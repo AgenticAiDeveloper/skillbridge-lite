@@ -1,5 +1,5 @@
+import os
 import json
-
 import firebase_admin
 from firebase_admin import credentials, auth
 from fastapi import Depends, HTTPException, status
@@ -9,12 +9,16 @@ from config import settings
 security = HTTPBearer()
 
 if not firebase_admin._apps:
-    if settings.FIREBASE_SERVICE_ACCOUNT_JSON:
-        cred = credentials.Certificate(json.loads(settings.FIREBASE_SERVICE_ACCOUNT_JSON))
+    firebase_json = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
+
+    if firebase_json:
+        service_account_info = json.loads(firebase_json)
+        cred = credentials.Certificate(service_account_info)
     else:
         cred = credentials.Certificate(settings.FIREBASE_SERVICE_ACCOUNT_PATH)
 
     firebase_admin.initialize_app(cred)
+
 
 async def get_current_user(
     credentials_data: HTTPAuthorizationCredentials = Depends(security)
