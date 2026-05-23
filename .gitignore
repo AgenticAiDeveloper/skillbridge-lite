@@ -17,6 +17,7 @@ __pycache__/
 
 # Firebase Admin Secret
 firebase-service-account.json
+backend/firebase-service-account.json
 *firebase-adminsdk*.json
 backend/skillbridge-lite-446f7-firebase-adminsdk-fbsvc-c42936fdc0.json
 
