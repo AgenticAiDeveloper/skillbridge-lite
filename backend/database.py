@@ -21,6 +21,14 @@ async def ping_database():
     await client.admin.command("ping")
 
 
+async def check_database_connection():
+    try:
+        await ping_database()
+        return True
+    except Exception:
+        return False
+
+
 async def ensure_indexes():
     await services_collection.create_index("created_at")
     await services_collection.create_index("owner_uid")
