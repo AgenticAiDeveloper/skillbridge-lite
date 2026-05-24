@@ -76,7 +76,7 @@ def _normalize_mongo_options(hosts_and_options: str) -> str:
 
 def _csv_env(name: str, default: str = "") -> list[str]:
     return [
-        item.strip()
+        item.strip().rstrip("/")
         for item in os.getenv(name, default).split(",")
         if item.strip()
     ]
@@ -95,7 +95,7 @@ class Settings:
     FIREBASE_SERVICE_ACCOUNT_PATH = _service_account_path()
     FIREBASE_SERVICE_ACCOUNT_JSON = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
 
-    CLIENT_URL = os.getenv("CLIENT_URL", "http://localhost:5173")
+    CLIENT_URL = os.getenv("CLIENT_URL", "http://localhost:5173").rstrip("/")
     CORS_ORIGINS = _csv_env(
         "CORS_ORIGINS",
         f"{CLIENT_URL},http://localhost:5173,http://127.0.0.1:5173"

@@ -1,18 +1,21 @@
-from fastapi import FastAPI, Response
+from fastapi import Depends, FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from config import settings
-from database import ping_database
+from database import check_database_connection
+from firebase_auth import get_current_user
 from routes import services
 
 app = FastAPI(
     title="SkillBridge Lite API",
     description="FastAPI backend for SkillBridge Lite marketplace",
-    version="1.0.0",
+    version="1.0.0"
 )
+
+allowed_origins = settings.CORS_ORIGINS
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,19 +34,22 @@ async def root():
 
 @app.get("/api/health")
 async def health_check():
-    database_status = "connected"
-
-    try:
-        await ping_database()
-    except Exception:
-        database_status = "unavailable"
+    db_ok = await check_database_connection()
 
     return {
         "success": True,
         "status": "healthy",
-        "database": database_status,
+        "database_connected": db_ok,
         "auth": "Firebase",
         "storage": "Cloudinary"
+    }
+
+
+@app.get("/api/auth/me")
+async def auth_me(current_user: dict = Depends(get_current_user)):
+    return {
+        "success": True,
+        "user": current_user,
     }
 
 
@@ -60,9 +66,4 @@ async def favicon():
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=settings.PORT,
-        reload=settings.ENVIRONMENT == "development",
-    )
+    uvicorn.run("main:app", host="0.0.0.0", port=settings.PORT)
